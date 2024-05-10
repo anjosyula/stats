@@ -1,10 +1,15 @@
 import random
-from termcolor import colored, cprint
+from dotenv import load_dotenv
 import requests_oauthlib
+from termcolor import cprint
+import os
+
+load_dotenv()
 
 emails = []
-client_key = '6f715814678fcb6db736db4a3dd05386064ffb8be'
-client_secret = '2f36af1ef33e0a2bbe5dd5d492269ea7'
+
+client_key = os.environ.get('CLIENT_KEY')
+client_secret = os.environ.get('CLIENT_SECRET')
 lcps = requests_oauthlib.OAuth1Session(client_key=client_key, client_secret=client_secret, signature_method='PLAINTEXT',
                                        signature_type='AUTH_HEADER')
 
@@ -31,11 +36,10 @@ def print_emails(group_id, color):
     class_list = [i for i in class_list if i['name_title'] == '' and (check_num(i['school_uid']) and int(i['school_uid']) > 700000)]
 
     for i in range(30):
-        user_id = class_list[random.randint(0, len(class_list) - 1)]["uid"]
+        idx = random.randint(0, len(class_list) - 1)
+        user_id = class_list[idx]["uid"]
+        class_list.remove(class_list[idx])
         email = lcps.get(f'https://api.schoology.com/v1/users/{user_id}').json()['primary_email']
-        while emails.__contains__(email):
-            user_id = class_list[random.randint(0, len(class_list) - 1)]["uid"]
-            email = lcps.get(f'https://api.schoology.com/v1/users/{user_id}').json()['primary_email']
         cprint(email, color)
 
 
